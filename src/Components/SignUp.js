@@ -43,7 +43,7 @@ export default class SignUp extends Component {
         } else if (!lowercasePassword) {
             errMsg = "Password at least one Lowercase";
         } else if (!digitsPassword) {
-            errMsg = "Password at least one digit";
+            errMsg = "Password at least contains one number";
         } else if (!specialCharPassword) {
             errMsg = "Password at least one Special Characters";
         } else {
