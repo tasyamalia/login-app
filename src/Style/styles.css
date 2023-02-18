@@ -1,0 +1,17 @@
+.btn-login{
+    background-color: #7275fa;
+    border: none;
+}
+.text-sign-up{
+    color: #53a3ce;
+    text-decoration: none;
+}
+.text-gray{
+    color: #6c7071;
+}
+.form-home{
+    margin-top: 40px;
+}
+.btn-logout{
+   margin-left: 40px;
+}
