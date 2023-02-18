@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Auth } from '../config/firebase'
+import { Auth, RealDatabase } from '../config/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
@@ -8,9 +8,10 @@ import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import '../Style/styles.css'
-
+import { ref, set } from 'firebase/database';
 export default class SignUp extends Component {
     state = {
+        username: '',
         email: '',
         password: '',
         isError: false,
@@ -23,7 +24,7 @@ export default class SignUp extends Component {
     }
     handleSubmit = (e) => {
         e.preventDefault();
-        const { email, password } = this.state
+        const { username, email, password } = this.state
         const uppercaseRegExp = /(?=.*?[A-Z])/
         const lowercaseRegExp = /(?=.*?[a-z])/
         const digitsRegExp = /(?=.*?[0-9])/
@@ -34,7 +35,7 @@ export default class SignUp extends Component {
         const digitsPassword = digitsRegExp.test(password)
         const specialCharPassword = specialCharRegExp.test(password)
         const minLengthPassword = minLengthRegExp.test(password)
-        let errMsg =""
+        let errMsg = ""
         if (!minLengthPassword) {
             errMsg = "Password at least minumum 8 characters";
         } else if (!uppercasePassword) {
@@ -45,24 +46,29 @@ export default class SignUp extends Component {
             errMsg = "Password at least one digit";
         } else if (!specialCharPassword) {
             errMsg = "Password at least one Special Characters";
-        } else{
-            errMsg=""
+        } else {
+            errMsg = ""
         }
-        if(errMsg !== ""){
+        if (errMsg !== "") {
             this.setState({ isError: true, errorMessage: errMsg });
-        }else{
+        } else {
             createUserWithEmailAndPassword(Auth, email, password)
-            .then(res => {
-                this.props.history.push('/login');
-            })
-            .catch(err => {
-                alert(err.message)
-            })
+                .then(res => {
+                    set(ref(RealDatabase, `users/${res.user.uid}/`), {
+                        username: username,
+                        email: email,
+                        uid: res.user.uid,
+                    });
+                    this.props.history.push('/login');
+                })
+                .catch(err => {
+                    alert(err.message)
+                })
         }
-        
+
     }
     render() {
-        const { email, password } = this.state
+        const { username, email, password } = this.state
         return (
             <Container>
                 <Row className="justify-content-md-center">
@@ -71,6 +77,12 @@ export default class SignUp extends Component {
                         <h2>Sign Up</h2>
                         <br />
                         <Form onSubmit={this.handleSubmit}>
+                        <br />
+                            <Form.Group className="mb-3" controlId="formBasicUsername">
+                                <Form.Label className="text-gray">Username</Form.Label>
+                                <Form.Control type="username" placeholder="" value={username} onChange={this.handleChangeField} name="username" label="Username" required />
+                            </Form.Group>
+                            <br />
                             <Form.Group className="mb-3" controlId="formBasicEmail">
                                 <Form.Label className="text-gray">Email address</Form.Label>
                                 <Form.Control type="email" placeholder="" value={email} onChange={this.handleChangeField} name="email" label="Email" required />
